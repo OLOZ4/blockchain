@@ -30,9 +30,18 @@ int returnVal(char x) {
     return (int)x - 87;
 }
 
+/*
+00000062543822610264258D17115314662NVF54382379210615438226102642 - "test"
+
+0004932137H5233600004223524543515N317024514C45263N2452H623150311 - "test1"
+
+0062212121181817570062212121887CC063111111887CCN09191921NMM32219 - "test2"
+
+*/
+
 int main() {
     vector<int> seed;
-    string s = "test";
+    string s = "test2";
     unsigned int var = 0;
 
     for (int i = 0; i < 64; i++) {
@@ -80,20 +89,26 @@ int main() {
 
     cout <<"-------------------"<<endl;
 
-    
+    string result;
 
     for (auto i : seed) {
 
         //cout << seed[i] << " -> ";
         if (seed[i] > 65 && seed[i] < 122) {
             cout << char(seed[i]);
+            result += char(seed[i]);
         }
         else {
             cout <<seed[i];
+            result += to_string((seed[i]));
         }
         //cout << endl;
     }
 
-    cout << endl;
+    cout <<  endl << result.length() << endl;
+
+    for (int i = 0; i < 64; i++) {
+        cout << result[i];
+    }
     return 0;
 }
