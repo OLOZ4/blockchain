@@ -89,7 +89,7 @@ int main() {
 
     cout <<"-------------------"<<endl;
 
-    string result;
+    string result = "";
 
     for (auto i : seed) {
 
