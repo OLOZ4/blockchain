@@ -32,7 +32,7 @@ int returnVal(char x) {
 
 int main() {
     vector<int> seed;
-    string s = "ą";
+    string s = "test";
     unsigned int var = 0;
 
     for (int i = 0; i < 64; i++) {
@@ -56,7 +56,7 @@ int main() {
     int sum = 0;
 
     for (auto i : seed) {
-        //cout << i << " ";
+        cout << i << " ";
         if (sum < 1000) sum +=i;
     }
 
@@ -78,6 +78,22 @@ int main() {
         seed[i]=abs(seed[i]-var2); 
     }
 
+    cout <<"-------------------"<<endl;
 
+    
+
+    for (auto i : seed) {
+
+        //cout << seed[i] << " -> ";
+        if (seed[i] > 65 && seed[i] < 122) {
+            cout << char(seed[i]);
+        }
+        else {
+            cout <<seed[i];
+        }
+        //cout << endl;
+    }
+
+    cout << endl;
     return 0;
 }
