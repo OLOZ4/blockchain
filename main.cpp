@@ -1,46 +1,37 @@
-/*
-Pseudo kodas
-
-Tarkime kad yra kazokie skaicai kaip seed'as
-
-Ivedame kazkoki teskta
-
-teksta pagal tam tikra algoritma pakeiciame i skaicius
-
-skaicius sudedame ir isrusiuojame
-
-gauname kazkoki unikalu skaiciu is ivesties
-
-ji naudojame kaip kazkoki unikalu rakta, kuris padaro hasha unikalu
-
-
-*/
-
-
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
-using namespace std;
-#include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+using namespace std;
 
 int returnVal(char x);
 
 string hashing(string s); 
+
+string read_file(const std::string& filename);
+
+void read_line(const std::string& filename);
+
 /*
-00000062543822610264258D17115314662NVF54382379210615438226102642 - "test"
+ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 
-0004932137H5233600004223524543515N317024514C45263N2452H623150311 - "test1"
+1767992352NE493213772523360XOF422352454351578317H245146745263782 - "test1"
 
-0062212121181817570062212121887CC063111111887CCN09191921NMM32219 - "test2"
+1870029171MC21212118181757WMC2121218876767ND111111887676778E9191 - "test2"
 
 */
 
 int main() {
-
-    cout << hashing("test") << endl;
+    
+    //string text = read_file("data/konstitucija.txt");
+    read_line("data/single.txt");
+    //cout << hashing("") << endl;
     return 0;
 }
 
@@ -89,14 +80,14 @@ string hashing(string s) {
 
     //cout <<"-------------------"<<endl;
 
-    string result = "";
+    string result= "";
 
     for (auto i : seed) {
 
         //cout << seed[i] << " -> ";
-        if (seed[i] > 65 && seed[i] < 122) {
+        if (i > 65 && i < 122) {
             //cout << char(seed[i]);
-            result += char(seed[i]);
+            result += static_cast<char>(i);
         }
         else {
             //cout <<seed[i];
@@ -105,15 +96,35 @@ string hashing(string s) {
         //cout << endl;
     }
 
-    cout <<  endl << result.length() << endl;
-
-    /*
-    for (int i = 0; i < 64; i++) {
-        cout << result[i];
-    }
-    */
+    //cout <<  endl << result.length() << endl;
 
     result.resize(64);
     return result;
 
+}
+
+string read_file(const std::string& filename) {
+    std::ifstream file(filename); 
+
+    if (!file) {
+        throw std::runtime_error("Unable to open file: " + filename);
+    }
+
+    std::ostringstream ss;
+    ss << file.rdbuf();
+
+    return ss.str();
+}
+
+void read_line(const std::string& filename) {
+    std::ifstream file(filename);
+
+    if (!file) {
+        throw std::runtime_error("Unable to open file: " + filename);
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        cout << line << " -> " << hashing(line) << endl;
+    }
 }
