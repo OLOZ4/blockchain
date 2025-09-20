@@ -30,7 +30,7 @@ ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 int main() {
     
     //string text = read_file("data/konstitucija.txt");
-    read_line("data/single.txt");
+    read_line("data/1000");
     //cout << hashing("") << endl;
     return 0;
 }
