@@ -26,10 +26,9 @@ using namespace std;
 #include <iostream>
 #include <vector>
 
-int returnVal(char x) {
-    return (int)x - 87;
-}
+int returnVal(char x);
 
+string hashing(string s); 
 /*
 00000062543822610264258D17115314662NVF54382379210615438226102642 - "test"
 
@@ -40,8 +39,18 @@ int returnVal(char x) {
 */
 
 int main() {
+
+    cout << hashing("test") << endl;
+    return 0;
+}
+
+int returnVal(char x) {
+    return (int)x - 87;
+}
+
+string hashing(string s) {
     vector<int> seed;
-    string s = "test2";
+    //string s = "test2";
     unsigned int var = 0;
 
     for (int i = 0; i < 64; i++) {
@@ -57,7 +66,7 @@ int main() {
         var += returnVal(s[i]) *  pow(10,i+1);
     }
 
-    cout << endl << var << endl;
+    //cout << endl << var << endl;
 
     stable_sort(seed.begin(), seed.end());
     
@@ -65,21 +74,12 @@ int main() {
     int sum = 0;
 
     for (auto i : seed) {
-        cout << i << " ";
+        //cout << i << " ";
         if (sum < 1000) sum +=i;
     }
 
-    cout << "sum: " << sum << endl;
+    //cout << "sum: " << sum << endl;
 
-    /*
-    float var2 = var * 1.0;
-    for (int i = 0; i < 5; i++){
-        var2 = var2/2.0;
-        cout << "var2: "<< (int(var2*100))/((to_string(var2).length())-10)<< " " << var2 << endl;
-        
-        
-    }
-    */
     int var2;
     for (int i = 0; i < 64; i++) {
         var2 = (var - sum*i)%100;
@@ -87,7 +87,7 @@ int main() {
         seed[i]=abs(seed[i]-var2); 
     }
 
-    cout <<"-------------------"<<endl;
+    //cout <<"-------------------"<<endl;
 
     string result = "";
 
@@ -95,11 +95,11 @@ int main() {
 
         //cout << seed[i] << " -> ";
         if (seed[i] > 65 && seed[i] < 122) {
-            cout << char(seed[i]);
+            //cout << char(seed[i]);
             result += char(seed[i]);
         }
         else {
-            cout <<seed[i];
+            //cout <<seed[i];
             result += to_string((seed[i]));
         }
         //cout << endl;
@@ -107,8 +107,13 @@ int main() {
 
     cout <<  endl << result.length() << endl;
 
+    /*
     for (int i = 0; i < 64; i++) {
         cout << result[i];
     }
-    return 0;
+    */
+
+    result.resize(64);
+    return result;
+
 }
