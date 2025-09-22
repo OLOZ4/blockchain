@@ -3,6 +3,13 @@
 #include <string>
 #include <random>
 
+//const std::string charset = "abcdefghijklmnopqrstuvwxyz";
+
+const std::string charset = 
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
 // Function to generate a single random string of given length
 std::string generateRandomString(size_t length) {
     const std::string charset = 
@@ -22,6 +29,21 @@ std::string generateRandomString(size_t length) {
     return result;
 }
 
+std::string generateSequentialString(size_t index, size_t length) {
+    std::string result(length, charset[0]);
+
+    size_t base = charset.size();
+    size_t pos = 0;
+
+    while (index > 0 && pos < length) {
+        result[pos] = charset[index % base];
+        index /= base;
+        ++pos;
+    }
+
+    return result;
+}
+
 int main() {
     size_t numStrings, stringLength;
 
@@ -34,11 +56,14 @@ int main() {
 
     std::cout << "\nGenerated Random Strings:\n";
     
-    std::ofstream out ("data/"+std::to_string(stringLength)+".txt");
+    std::ofstream out ("data/"+std::to_string(stringLength)+"_seq.txt");
 
     for (size_t i = 0; i < numStrings; ++i) {
-        std::cout << generateRandomString(stringLength) << "\n";
-        out << generateRandomString(stringLength) << std::endl;
+        //std::cout << generateRandomString(stringLength) << "\n";
+        //out << generateRandomString(stringLength) << std::endl;
+
+        std::cout << generateSequentialString(i,stringLength) << "\n";
+        out << generateSequentialString(i,stringLength) << std::endl;
     }
 
     return 0;

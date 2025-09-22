@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <numeric>
 
 using namespace std;
 
@@ -30,8 +32,9 @@ ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 int main() {
     
     //string text = read_file("data/konstitucija.txt");
-    read_line("data/1000");
-    //cout << hashing("") << endl;
+    //read_line("1000_seq.txt");
+    //cout << hashing(text) << endl;
+    cout << hashing("test");
     return 0;
 }
 
@@ -40,15 +43,12 @@ int returnVal(char x) {
 }
 
 string hashing(string s) {
-    vector<int> seed;
+    //vector<int> seed;
     //string s = "test2";
     unsigned int var = 0;
 
-    for (int i = 0; i < 64; i++) {
-        seed.push_back(i);
-        //cout <<seed[i]<<endl;
-        
-    }
+    std::vector<int> seed(64);
+    std::iota(seed.begin(), seed.end(), 0); 
 
     for (unsigned int i = 0; i < s.length(); i++)
     {
@@ -62,14 +62,16 @@ string hashing(string s) {
     stable_sort(seed.begin(), seed.end());
     
 
-    int sum = 0;
+    unsigned int sum = 0;
 
     for (auto i : seed) {
         //cout << i << " ";
         if (sum < 1000) sum +=i;
     }
 
-    //cout << "sum: " << sum << endl;
+    //abs(sum);
+
+    cout << "sum: " << sum << endl;
 
     int var2;
     for (int i = 0; i < 64; i++) {
@@ -84,14 +86,14 @@ string hashing(string s) {
 
     for (auto i : seed) {
 
-        //cout << seed[i] << " -> ";
+        //cout << i << " -> ";
         if (i > 65 && i < 122) {
             //cout << char(seed[i]);
             result += static_cast<char>(i);
         }
         else {
             //cout <<seed[i];
-            result += to_string((seed[i]));
+            result += to_string(i);
         }
         //cout << endl;
     }
@@ -117,7 +119,8 @@ string read_file(const std::string& filename) {
 }
 
 void read_line(const std::string& filename) {
-    std::ifstream file(filename);
+    std::ifstream file("data/"+filename);
+    std::ofstream out ("output/"+filename);
 
     if (!file) {
         throw std::runtime_error("Unable to open file: " + filename);
@@ -125,6 +128,7 @@ void read_line(const std::string& filename) {
 
     std::string line;
     while (std::getline(file, line)) {
-        cout << line << " -> " << hashing(line) << endl;
+        //cout << line << " -> " << hashing(line) << endl;
+        out << line << " -> " << hashing(line) << endl;
     }
 }
