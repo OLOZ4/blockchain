@@ -18,6 +18,13 @@
 
 ## Eksperimentinis tyrimas
 
+### Pavyzdžiai
+|Įvedimas|Hashas|
+|--------|------|
+|lietuva|```18445343w31497Q55293N53271K50241I47215E4317965391312623611155933```|
+|Lietuva|```KG95jgd4354494439343026211611623813182328C6257524743383329241914```|
+|Lietuva!|```D3524d62403232D28124910F30105011G3195111G31951112932852132733754```|
+
 ### Išvedimo dydis
 Išvedimo dydis nėra priklausomas nuo įvesties dydžio. Išvedimo dydis visada bus 64 simboliai:
 ```
@@ -49,19 +56,22 @@ Matuosime failo konstitucija.txt efektyvumą su skirtingu kiekiu eilučių.
 |789|1750|
 
 ### Kolizijų paieška
+Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100, 500, 1000 simbolių.
 
+|String'o ilgis|Kolizijų kiekis|
+|--------------|---------------|
+|10|0|
+|100|0|
+|500|0|
+|1000|0|
 
-2. Paimame kiekviena ivesties simboli ir 1. paverciame ji skaiciu ir 2. atimame is to skaiciaus 87. 
+### Lavinos efektas
 
-3. Gautus skaicius pridedame prie seed'o masyvo
+### Negrįžtamumo operacija
++ Hiding: Labai silpnas
++ Puzzle-Friendliness: Geras
 
-4. Taip pat is gautu skaiciu suskaiciuojame kintamaji nr.1 naudojant formule: var += returnVal(s[i]) *  pow(10,i+1);
-5. Isrusiuojame seed'o masyva didejimo tvarka
-
-6. Skaiciuojame suma: sudedame visus skaicius seedo vektoriuje esancius skaicius sudedame iki kol suma nevirsyja 1000.
-
-7. Skaiciuojame kintamaji nr. 2 : var2 = (var - sum*i)%100; cia i priklauso nuo 0 iki 63. t.y. gauname du skaicius ir juos atimame is i-tojo seed'o vektoriaus elemento ir idedami ji i moduli
-
-8. Isivedame nauja kintamaji: rezultata. Paimame kiekviena seed'o vektoriaus elementa (skaiciu) ir jei jis yra tarp 65 ir 122 tai paverciame ji i simboli pagal ascii lentele ir pridedame i rezultato stringa, kitu atveju skaiciu paverciame i stringa ir pridedame i ta pati stringa. 
-
-9. Isvedame pirmus 64 simbolius is rezultato stringo.
+### Išvadosga
++ Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę
++ Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
++ Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
