@@ -67,6 +67,13 @@ Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100,
 
 ### Lavinos efektas
 
+Hashų skrtingumo lentelė
+
+|Lyginimas|Min|Max|Avg|
+|---|---|---|-|
+|HEX(%) |1.56|100|81.75|
+|BIT(%) |0.78|49.22|34.41|
+
 ### Negrįžtamumo operacija
 + Hiding: Labai silpnas
 + Puzzle-Friendliness: Geras
