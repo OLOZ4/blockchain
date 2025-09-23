@@ -10,6 +10,12 @@
 + Išrūšiuojame seed vektorių
 + Įvedame naują kintamąjį *sum = 0*
 + Iš seed vektoriaus pridedame skaičius prie kintamojo sum nuo mažiausio jei kintamasis sum < 1000
++ Kiekvienas seed vektoriaus elementas i (i priklauso nuo 0 iki 63) yra modifikuojamas pagal formulę ```seed[i] = abs(seed[i]–var2)``` čia ``` var2 = (var - sum * i) % 100```
++ Kiekvienam seed vektoriaus elementui naudojame šią formulę ```seed[i % 64] ^= returnVal(s[i]) + i;```
++ Nustatome stringą ```result = ""```
++ Galiausiai imame visus seed elementus (visi elementai yra skaičiai) ir tikriname, jei elementas yra tarp 65 ir 91 arba tarp 96 ir 123 - jei tiesa, tai verčiame į raidę ir pridedame pries stringo result, o jei ne, paliekame skaičių ir taip pat pridedame prie stringo result
++ String'ą result "nupjauname" ir paliekame tik pirmus 64 simbolius
++ Gražiname result 
 
 2. Paimame kiekviena ivesties simboli ir 1. paverciame ji skaiciu ir 2. atimame is to skaiciaus 87. 
 
