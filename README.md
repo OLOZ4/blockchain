@@ -71,7 +71,7 @@ Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100,
 + Hiding: Labai silpnas
 + Puzzle-Friendliness: Geras
 
-### Išvadosga
+### Išvados
 + Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę
 + Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
 + Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
