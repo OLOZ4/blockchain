@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <numeric>
+#include <chrono>
 
 using namespace std;
 
@@ -38,9 +39,17 @@ ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 int main() {
     
     //string text = read_file("data/konstitucija.txt");
-    //read_line("1000.txt");
+    //read_line("1000_seq.txt");
+    string input = "Lietuva!";
+    cout << input << " –> " << hashing1(input) << endl;
     
-    cout << hashing1("") << endl;
+    //cout << input << " –> " << hashing1(input) << endl;
+    
+    //auto start = std::chrono::high_resolution_clock::now();
+    //cout << hashing1(text)<<endl;
+    //auto end = std::chrono::high_resolution_clock::now();
+    //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    //std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
     //cout << hashing1("Test") << endl;
     //cout << hashing("test") << endl;
     //cout << hashing("Test") << endl;
@@ -119,6 +128,9 @@ string hashing(string s) {
     //cout <<  endl << result.length() << endl;
 
     result.resize(64);
+    for (int i  = 0; i < result.size(); i ++) {
+        result[i] = abs(result[i]);
+    }
     return result;
 
 }
