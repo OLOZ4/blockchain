@@ -1,19 +1,84 @@
-Hashavimo algoritmas:
+# V1 versija (be AI)
 
-1. Turime Seeda - vektoriu <0,1,2,...,n> cia n = 63
+## Pseudo-kodas
 
-2. Paimame kiekviena ivesties simboli ir 1. paverciame ji skaiciu ir 2. atimame is to skaiciaus 87. 
++ Funcija gauna stringą s
++ Inicijuojame kintamąjį *var = 0*
++ Inicijuojame vektorių *seed* skaičiais nuo 0 iki 63
++ Kiekvienam stringo s elementą i (i priklauso nuo 0 iki s.length-1) pridedame į seed vektorų naudodami ```seed[i % 64] ^= returnVal(s[i]) + i```
++ Išrūšiuojame seed vektorių
++ Įvedame naują kintamąjį *sum = 0*
++ Iš seed vektoriaus pridedame skaičius prie kintamojo sum nuo mažiausio jei kintamasis sum < 1000
++ Kiekvienas seed vektoriaus elementas i (i priklauso nuo 0 iki 63) yra modifikuojamas pagal formulę ```seed[i] = abs(seed[i]–var2)``` čia ``` var2 = (var - sum * i) % 100```
++ Kiekvienam seed vektoriaus elementui naudojame šią formulę ```seed[i % 64] ^= returnVal(s[i]) + i;```
++ Nustatome stringą ```result = ""```
++ Galiausiai imame visus seed elementus (visi elementai yra skaičiai) ir tikriname, jei elementas yra tarp 65 ir 91 arba tarp 96 ir 123 - jei tiesa, tai verčiame į raidę ir pridedame pries stringo result, o jei ne, paliekame skaičių ir taip pat pridedame prie stringo result
++ String'ą result "nupjauname" ir paliekame tik pirmus 64 simbolius
++ Gražiname result
 
-3. Gautus skaicius pridedame prie seed'o masyvo
+## Eksperimentinis tyrimas
 
-4. Taip pat is gautu skaiciu suskaiciuojame kintamaji nr.1 naudojant formule: var += returnVal(s[i]) *  pow(10,i+1);
+### Pavyzdžiai
+|Įvedimas|Hashas|
+|--------|------|
+|lietuva|```18445343w31497Q55293N53271K50241I47215E4317965391312623611155933```|
+|Lietuva|```KG95jgd4354494439343026211611623813182328C6257524743383329241914```|
+|Lietuva!|```D3524d62403232D28124910F30105011G3195111G31951112932852132733754```|
 
-5. Isrusiuojame seed'o masyva didejimo tvarka
+### Išvedimo dydis
+Išvedimo dydis nėra priklausomas nuo įvesties dydžio. Išvedimo dydis visada bus 64 simboliai:
+```
+                                    a –> 1194939291ZYXWVVUTSRQPONMLKJIHGFEDCB6564636261605958575655545352
+Labai Labai labai ilgas ilgas tekstas –> FFM58594D26172013l313551575458384752212311561405958425417111915X
+```
 
-6. Skaiciuojame suma: sudedame visus skaicius seedo vektoriuje esancius skaicius sudedame iki kol suma nevirsyja 1000.
+### Deterministiškumas
+Visada ta pati įvestis duos tą pačią išvestį:
+```
+Testas –> R65922236621975SH6048362412012L64524028164719E574533219214253751
+Testas –> R65922236621975SH6048362412012L64524028164719E574533219214253751
+```
 
-7. Skaiciuojame kintamaji nr. 2 : var2 = (var - sum*i)%100; cia i priklauso nuo 0 iki 63. t.y. gauname du skaicius ir juos atimame is i-tojo seed'o vektoriaus elemento ir idedami ji i moduli
+### Efektyvumas
+Matuosime failo konstitucija.txt efektyvumą su skirtingu kiekiu eilučių. 
 
-8. Isivedame nauja kintamaji: rezultata. Paimame kiekviena seed'o vektoriaus elementa (skaiciu) ir jei jis yra tarp 65 ir 122 tai paverciame ji i simboli pagal ascii lentele ir pridedame i rezultato stringa, kitu atveju skaiciu paverciame i stringa ir pridedame i ta pati stringa. 
+|Eilučių kiekis|Laikas mikrosekundėmis|
+|--------------|----------------------|
+|2|50|
+|4|52|
+|8|55|
+|16|70|
+|32|90|
+|64|130|
+|128|250|
+|256|520|
+|512|1200|
+|789|1750|
 
-9. Isvedame pirmus 64 simbolius is rezultato stringo.
+### Kolizijų paieška
+Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100, 500, 1000 simbolių.
+
+|String'o ilgis|Kolizijų kiekis|
+|--------------|---------------|
+|10|0|
+|100|0|
+|500|0|
+|1000|0|
+
+### Lavinos efektas
+
+Hashų skrtingumo lentelė
+
+|Lyginimas|Min|Max|Avg|
+|---|---|---|-|
+|HEX(%) |1.56|100|81.75|
+|BIT(%) |0.78|49.22|34.41|
+
+### Negrįžtamumo operacija
++ Hiding: Labai silpnas
++ Puzzle-Friendliness: Geras
+
+### Išvados
++ Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę
++ Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
++ Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
