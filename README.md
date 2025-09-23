@@ -1,13 +1,21 @@
-Hashavimo algoritmas:
+# V1 versija (be AI)
 
-1. Turime Seeda - vektoriu <0,1,2,...,n> cia n = 63
+## Pseudo-kodas
+
++ Funcija gauna stringą s
++ Inicijuojame kintamąjį *var = 0*
++ Inicijuojame vektorių *seed* skaičiais nuo 0 iki 63
+----------------
++ Kiekvienam stringo s elementą i (i priklauso nuo 0 iki s.length-1) pridedame į seed vektorų naudodami ```seed[i % 64] ^= returnVal(s[i]) + i```
++ Išrūšiuojame seed vektorių
++ Įvedame naują kintamąjį *sum = 0*
++ Iš seed vektoriaus pridedame skaičius prie kintamojo sum nuo mažiausio jei kintamasis sum < 1000
 
 2. Paimame kiekviena ivesties simboli ir 1. paverciame ji skaiciu ir 2. atimame is to skaiciaus 87. 
 
 3. Gautus skaicius pridedame prie seed'o masyvo
 
 4. Taip pat is gautu skaiciu suskaiciuojame kintamaji nr.1 naudojant formule: var += returnVal(s[i]) *  pow(10,i+1);
-
 5. Isrusiuojame seed'o masyva didejimo tvarka
 
 6. Skaiciuojame suma: sudedame visus skaicius seedo vektoriuje esancius skaicius sudedame iki kol suma nevirsyja 1000.
