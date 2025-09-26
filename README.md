@@ -83,6 +83,9 @@ Hashų skrtingumo lentelė
 + Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
 + Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
 
+### V1.1
++ Patobulintas saltas: saltas dabar nera statinis, o priklausantis nuo ivesties
+
 #V2 versija (su AI)  🔐 Custom 256-bitų Hash Algoritmas - Visas Vadovas
 
 ## 📝 Aprašymas
