@@ -40,20 +40,20 @@ Testas –> R65922236621975SH6048362412012L64524028164719E574533219214253751
 ```
 
 ### Efektyvumas
-Matuosime failo konstitucija.txt efektyvumą su skirtingu kiekiu eilučių. 
+Matuosime failo konstitucija.txt efektyvumą su skirtingu kiekiu eilučių + palyginsime su md5 algoritmu. 
 
-|Eilučių kiekis|Laikas mikrosekundėmis|
-|--------------|----------------------|
-|2|50|
-|4|52|
-|8|55|
-|16|70|
-|32|90|
-|64|130|
-|128|250|
-|256|520|
-|512|1200|
-|789|1750|
+|Eilučių kiekis|Laikas mikrosekundėmis (custm hash)|Laikas mikrosekundėmis (md5)|
+|--------------|----------------------|-|
+|2|50|1550|
+|4|52|1600|
+|8|55|1500|
+|16|70|1700|
+|32|90|1500|
+|64|130|1550|
+|128|250|1700|
+|256|520|1700|
+|512|1200|1600|
+|789|1750|1700|
 
 ### Kolizijų paieška
 Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100, 500, 1000 simbolių.
@@ -82,6 +82,9 @@ Hashų skrtingumo lentelė
 + Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę
 + Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
 + Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
+
+### V1.1
++ Patobulintas saltas: saltas dabar nera statinis, o priklausantis nuo ivesties
 
 #V2 versija (su AI)  🔐 Custom 256-bitų Hash Algoritmas - Visas Vadovas
 
