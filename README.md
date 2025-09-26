@@ -55,6 +55,9 @@ Matuosime failo konstitucija.txt efektyvumą su skirtingu kiekiu eilučių + pal
 |512|1200|1600|
 |789|1750|1700|
 
+---------------------------
+![grafikas](./images/image.png)
+
 ### Kolizijų paieška
 Sugeneruota po 100 000 atsitiktinių string porų, kurių ilgis būtų: 10, 100, 500, 1000 simbolių.
 
