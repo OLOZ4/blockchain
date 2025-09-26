@@ -10,6 +10,8 @@
 #include <string>
 #include <numeric>
 #include <chrono>
+#include <openssl/md5.h>
+#include <openssl/evp.h>
 
 using namespace std;
 
@@ -27,6 +29,8 @@ int returnVal3(char x);
 
 std::string hashing3(const std::string& s);
 
+std::string computeMD5FromFile(const std::string& filepath);
+
 /*
 ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 
@@ -38,18 +42,19 @@ ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 
 int main() {
     
-    //string text = read_file("data/konstitucija.txt");
+    string text = read_file("data/konstitucija.txt");
     //read_line("1000_seq.txt");
-    string input = "Lietuva!";
-    cout << input << " –> " << hashing1(input) << endl;
+    //string input = "Lietuva";
+    //cout << input << " –> " << hashing1(input) << endl;
     
     //cout << input << " –> " << hashing1(input) << endl;
     
-    //auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     //cout << hashing1(text)<<endl;
-    //auto end = std::chrono::high_resolution_clock::now();
-    //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    //std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
+    cout << computeMD5FromFile("data/konstitucija.txt") << endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
     //cout << hashing1("Test") << endl;
     //cout << hashing("test") << endl;
     //cout << hashing("Test") << endl;
@@ -138,7 +143,12 @@ string hashing(string s) {
 string hashing1(string s) {
     unsigned int var = 0;
     std::vector<int> seed(64);
-    std::iota(seed.begin(), seed.end(), 0); 
+    //std::iota(seed.begin(), seed.end(), 0); 
+
+    for (int i = 0; i < 64; ++i) {
+        char c = s[i % s.length()];
+        seed[i] = (static_cast<int>(c) * (i + 31)) % 256;  // 31 is a small prime to avoid simple patterns
+    }
 
     for (unsigned int i = 0; i < s.length(); i++) {
         seed[i % 64] ^= returnVal(s[i]) + i;
@@ -200,4 +210,54 @@ void read_line(const std::string& filename) {
         //out << line << " -> " << hashing(line) << endl;
         out << hashing1(line) << endl;
     }
+}
+
+std::string computeMD5FromFile(const std::string& filepath) {
+    std::ifstream file(filepath, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + filepath);
+    }
+
+    // Initialize OpenSSL MD5 context
+    EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
+    if (!mdctx) {
+        throw std::runtime_error("Failed to create EVP_MD_CTX");
+    }
+
+    if (1 != EVP_DigestInit_ex(mdctx, EVP_md5(), NULL)) {
+        EVP_MD_CTX_free(mdctx);
+        throw std::runtime_error("Failed to initialize digest");
+    }
+
+    // Read file in chunks
+    const size_t bufferSize = 4096;
+    char buffer[bufferSize];
+
+    while (file.good()) {
+        file.read(buffer, bufferSize);
+        std::streamsize bytesRead = file.gcount();
+
+        if (1 != EVP_DigestUpdate(mdctx, buffer, bytesRead)) {
+            EVP_MD_CTX_free(mdctx);
+            throw std::runtime_error("Failed to update digest");
+        }
+    }
+
+    unsigned char hash[MD5_DIGEST_LENGTH];
+    unsigned int hashLen;
+
+    if (1 != EVP_DigestFinal_ex(mdctx, hash, &hashLen)) {
+        EVP_MD_CTX_free(mdctx);
+        throw std::runtime_error("Failed to finalize digest");
+    }
+
+    EVP_MD_CTX_free(mdctx);
+
+    // Convert to hex string
+    std::ostringstream oss;
+    for (unsigned int i = 0; i < hashLen; ++i) {
+        oss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+    }
+
+    return oss.str();
 }
