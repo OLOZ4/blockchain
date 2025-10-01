@@ -44,17 +44,17 @@ int main() {
     
     string text = read_file("data/konstitucija.txt");
     //read_line("1000_seq.txt");
-    //string input = "Lietuva";
-    //cout << input << " –> " << hashing1(input) << endl;
+    string input = "";
+    cout << input << " –> " << hashing1(input) << endl;
     
     //cout << input << " –> " << hashing1(input) << endl;
     
-    auto start = std::chrono::high_resolution_clock::now();
+    //auto start = std::chrono::high_resolution_clock::now();
     //cout << hashing1(text)<<endl;
-    cout << computeMD5FromFile("data/konstitucija.txt") << endl;
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
+    //cout << computeMD5FromFile("data/konstitucija.txt") << endl;
+    //auto end = std::chrono::high_resolution_clock::now();
+    //auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    //std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
     //cout << hashing1("Test") << endl;
     //cout << hashing("test") << endl;
     //cout << hashing("Test") << endl;
@@ -143,13 +143,17 @@ string hashing(string s) {
 string hashing1(string s) {
     unsigned int var = 0;
     std::vector<int> seed(64);
-    //std::iota(seed.begin(), seed.end(), 0); 
+    //
+    
+    if (s == "") std::iota(seed.begin(), seed.end(), 0); 
 
-    for (int i = 0; i < 64; ++i) {
-        char c = s[i % s.length()];
-        seed[i] = (static_cast<int>(c) * (i + 31)) % 256;  // 31 is a small prime to avoid simple patterns
+    else {
+        for (int i = 0; i < 64; ++i) {
+            char c = s[i % s.length()];
+            seed[i] = (static_cast<int>(c) * (i + 31)) % 256;
+        }
     }
-
+    
     for (unsigned int i = 0; i < s.length(); i++) {
         seed[i % 64] ^= returnVal(s[i]) + i;
     }
