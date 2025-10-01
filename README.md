@@ -4,7 +4,7 @@
 
 + Funcija gauna stringą s
 + Inicijuojame kintamąjį *var = 0*
-+ Inicijuojame vektorių *seed* skaičiais nuo 0 iki 63
++ Inicijuojame vektorių *seed* ```seed[i] = (static_cast<int>(c) * (i + 31)) % 256``` čia i priklauso nuo 0 iki 63 ir ```c = s[i % s.length()]```
 + Kiekvienam stringo s elementą i (i priklauso nuo 0 iki s.length-1) pridedame į seed vektorų naudodami ```seed[i % 64] ^= returnVal(s[i]) + i```
 + Išrūšiuojame seed vektorių
 + Įvedame naują kintamąjį *sum = 0*
@@ -82,9 +82,11 @@ Hashų skrtingumo lentelė
 + Puzzle-Friendliness: Geras
 
 ### Išvados
-+ Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę
++ ~~Padariau labai didelę klaidą kad naudojau statinį salt'ą nes teoriškai galima žinant tą salt'ą gauti pradinę reikšmę~~ sutaisyta atnaujintoje versijoje
 + Nepaisant to, vizualiai hashavimas atrodo gerai, turi lavinos efektą, neturi kolilizijų bei yra efektyvus, tačiau nepaisant to, jokiu būdu negalima pasitikėti šiuo hashavimo algoritmu
 + Taip pat pastebėjau, kad kuo įvestis mažesnė, tuo daugiau hash'as turi raidžių, kas praktiškai "išduoda" hashuotos informacijos ilgį.
++ Efektyvumas priklauso nuo įvesties dydžio, galima matyti grafike.
++ Naudojamos tiek didžiosios tiek mažosios raidės, galbūt reikėtų apsistoti ties vienomis - naudoti arba tik didžiasisas arba tik mažasias, tačiau tai galėtų turėti įtakos kolizijų kiekiui
 
 ### V1.1
 + Patobulintas saltas: saltas dabar nera statinis, o priklausantis nuo ivesties
