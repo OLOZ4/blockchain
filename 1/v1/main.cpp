@@ -12,6 +12,7 @@
 #include <chrono>
 #include <openssl/md5.h>
 #include <openssl/evp.h>
+#include <random>
 
 using namespace std;
 
@@ -31,6 +32,8 @@ std::string hashing3(const std::string& s);
 
 std::string computeMD5FromFile(const std::string& filepath);
 
+std::string generateRandomString(size_t length);
+
 /*
 ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 
@@ -42,12 +45,18 @@ ZVRNJFB54382261026425868171153146627886705438237921D615438226102 - "test"
 
 int main() {
     
-    string text = read_file("data/konstitucija.txt");
+    //string text = read_file("data/konstitucija.txt");
     //read_line("1000_seq.txt");
-    string input = "";
-    cout << input << " –> " << hashing1(input) << endl;
-    
+    //string input = "labas!";
     //cout << input << " –> " << hashing1(input) << endl;
+    string comb = "123";
+    //cout << input << " –> " << hashing1(input) << endl;
+    while (true) {
+        comb = hashing1(generateRandomString(64));
+        //cout << comb << endl;
+        if (comb[0] == '0' && comb[1] == '0' && comb[2] == '0' && comb[3] == '0') break;
+    }
+    cout <<comb<<endl;
     
     //auto start = std::chrono::high_resolution_clock::now();
     //cout << hashing1(text)<<endl;
@@ -151,9 +160,10 @@ string hashing1(string s) {
         for (int i = 0; i < 64; ++i) {
             char c = s[i % s.length()];
             seed[i] = (static_cast<int>(c) * (i + 31)) % 256;
+            //cout << seed[i];
         }
     }
-    
+
     for (unsigned int i = 0; i < s.length(); i++) {
         seed[i % 64] ^= returnVal(s[i]) + i;
     }
@@ -264,4 +274,22 @@ std::string computeMD5FromFile(const std::string& filepath) {
     }
 
     return oss.str();
+}
+
+std::string generateRandomString(size_t length) {
+    const std::string charset = 
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    static std::mt19937 rng(std::random_device{}());
+    static std::uniform_int_distribution<> dist(0, charset.size() - 1);
+
+    std::string result;
+    result.reserve(length);
+
+    for (size_t i = 0; i < length; ++i) {
+        result += charset[dist(rng)];
+    }
+
+    return result;
 }
