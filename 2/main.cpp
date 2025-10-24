@@ -1,20 +1,5 @@
 #include "header.h"
-#include <cstdlib>
-#include <string>
-#include <vector>
 
-struct user {
-    string name;
-    int balance;
-    string hash;
-};
-
-struct transaction {
-    string sender_hash;
-    string receiver_hash;
-    int amount;
-    string hash;
-};
 
 int main() {
 
@@ -42,9 +27,14 @@ int main() {
         transactions.push_back(t);
 
         //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
-        cout <<"["<<i<<"] " << transactions[i].hash << " " << transactions[i].amount << endl;
+        //cout <<"["<<i<<"] " << transactions[i].hash << " " << transactions[i].amount << endl;
     }
 
-    check_transactions()
+    vector<transaction> valid_transactions = validate_transactions(users, transactions);
 
+    for (int i = 0; i < valid_transactions.size(); i++) {
+
+        //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
+        cout <<"["<<i<<"] " << valid_transactions[i].hash << " " << valid_transactions[i].amount << endl;
+    }
 }

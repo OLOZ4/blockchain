@@ -1,5 +1,4 @@
 #include "header.h"
-#include <fstream>
 
 int test() {
     int i = 3;
@@ -86,4 +85,33 @@ string get_name() {
 
 int get_balance() {
     return random_int(1, 1000000);
+}
+
+vector<transaction> validate_transactions(vector<user> users, vector<transaction> transactions) {
+    std::vector<transaction> valid_txs;
+
+    for (const auto& tx : transactions) {
+        auto it_sender = std::find_if(
+            users.begin(), users.end(),
+            [&](const user& u){ return u.hash == tx.sender_hash; });
+        auto it_receiver = std::find_if(
+            users.begin(), users.end(),
+            [&](const user& u){ return u.hash == tx.receiver_hash; });
+
+        if (it_sender == users.end() || it_receiver == users.end()) {
+            // unknown user
+            continue;
+        }
+
+        if (it_sender->balance >= tx.amount) {
+            
+            // apply
+            it_sender->balance   -= tx.amount;
+            it_receiver->balance += tx.amount;
+            
+            valid_txs.push_back(tx);
+        }
+    }
+    return valid_txs;
+
 }
