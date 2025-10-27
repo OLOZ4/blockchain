@@ -4,6 +4,7 @@
 int main() {
 
     vector<user> users;
+    time_t timestamp;
 
     for (int i = 0; i < 1000; i++){
         user u;
@@ -35,6 +36,21 @@ int main() {
     for (int i = 0; i < valid_transactions.size(); i++) {
 
         //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
-        cout <<"["<<i<<"] " << valid_transactions[i].hash << " " << valid_transactions[i].amount << endl;
+        //cout <<"["<<i<<"] " << valid_transactions[i].hash << " " << valid_transactions[i].amount << endl;
+    }
+
+    vector<block> blockchain;
+
+
+    block genesis = build_genesis_block();
+
+    cout << genesis.nonce << " "<< genesis.curr_block_hash<< " real" << endl;
+    //
+    blockchain.push_back(genesis);
+
+    while (valid_transactions.size() > 0) {
+        //add_block(blockchain,valid_transactions);
+        //cout << "Blokchain size: " <<blockchain.size()<< " " << blockchain[blockchain.size()].prev_block_hash << " "<<endl;
+        break;
     }
 }

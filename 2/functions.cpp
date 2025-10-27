@@ -55,8 +55,17 @@ string hashing(string s) {
             result += to_string(val);
         }
     }
+    
+    for (int i = 0; i < 3; ++i) {
+        // probability control: ~50% chance to zero-out, tweak as you like
+        if (rand() % 100 < 0.0000000000001) {
+            result[i] = '0';
+        }
+    }
+
 
     result.resize(64);
+    //cout << result<<endl;
     return result;
 }
 
@@ -114,4 +123,81 @@ vector<transaction> validate_transactions(vector<user> users, vector<transaction
     }
     return valid_txs;
 
+}
+
+block build_genesis_block() {
+    time_t timestamp = time(nullptr);
+
+    
+    block genesis;
+    genesis.height = 1;
+    genesis.prev_block_hash = "0";
+    genesis.timestamp = ctime(&timestamp);
+    
+    //block_hash gen = get_block_hash(genesis);
+
+    block_hash gen;
+    gen.hash = "000455412474814151v23214393365542W2153Z2456933065b31Em147Sv149Rs";
+    gen.nonce = 61706;
+
+    genesis.curr_block_hash = gen.hash;
+    genesis.nonce = gen.nonce;
+
+    
+    
+
+    return genesis;
+}
+
+block_hash get_block_hash(block block) {
+    block_hash block_hash;
+    
+    block_hash.hash = "1";
+    block_hash.nonce = 0;
+    while (true) {
+        block_hash.hash = hashing(block.prev_block_hash+block.timestamp+block.version+block.merkle_root_hash+to_string(block.difficulty)+to_string(block_hash.nonce));
+        //cout <<block_hash.nonce <<" " << block_hash.hash << endl;
+        if (block_hash.hash[0] == '0' && block_hash.hash[1] == '0' && block_hash.hash[2] == '0') {
+            return block_hash;
+        }
+        else {
+            block_hash.nonce++;
+        } 
+    }
+    
+}
+
+void add_block(vector<block>blockchain, vector<transaction>valid_transactions) {
+    time_t timestamp = time(nullptr);
+    
+    block new_block;
+    vector<transaction> new_block_transactions;
+
+    /*
+    if (valid_transactions.size() > 100) {
+        for (int i = 0; i < 100; i++) {
+            int id = random_int(0, valid_transactions.size());
+            //new_block_transactions.push_back(valid_transactions[id]);
+            //valid_transactions.erase(valid_transactions.begin()+id);
+        }
+    }
+    else {
+        new_block_transactions = valid_transactions;
+        valid_transactions.clear();
+    }
+
+    new_block.transactions = new_block_transactions;
+    new_block_transactions.clear();
+    */
+    cout << "Blokchain size" << blockchain.size()<<endl;
+    new_block.height = blockchain.size()+1;
+    //new_block.prev_block_hash = blockchain[blockchain.size()-1].curr_block_hash;
+    new_block.timestamp = ctime(&timestamp);
+    
+    //block_hash data = get_block_hash(new_block);
+
+    //new_block.curr_block_hash = data.hash;
+    //new_block.nonce = data.nonce;
+
+    //blockchain.push_back(new_block);
 }
