@@ -7,8 +7,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
-
-
+#include <unistd.h>
 
 using namespace std;
 
@@ -26,11 +25,11 @@ struct transaction {
 };
 
 struct block {
-    int height;
-    string prev_block_hash;
-    string curr_block_hash;
+    int height = 0;
+    string prev_block_hash = "";
+    string curr_block_hash = ""; 
     int nonce = 0;
-    string timestamp;
+    string timestamp = "";
     string version = "1.0";
     string merkle_root_hash = "";
     int difficulty = 1 + 0.1 * height;
@@ -61,4 +60,4 @@ block build_genesis_block();
 
 block_hash get_block_hash(block block);
 
-void add_block(vector<block>blockchain, vector<transaction>valid_transactions);
+void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions);

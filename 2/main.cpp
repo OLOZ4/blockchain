@@ -44,13 +44,13 @@ int main() {
 
     block genesis = build_genesis_block();
 
-    cout << genesis.nonce << " "<< genesis.curr_block_hash<< " real" << endl;
+    //cout << genesis.nonce << " "<< genesis.curr_block_hash<< " real" << endl;
     //
     blockchain.push_back(genesis);
 
     while (valid_transactions.size() > 0) {
-        //add_block(blockchain,valid_transactions);
-        //cout << "Blokchain size: " <<blockchain.size()<< " " << blockchain[blockchain.size()].prev_block_hash << " "<<endl;
-        break;
+        add_block(blockchain,valid_transactions);
+        cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl;
+        //sleep(3);
     }
 }
