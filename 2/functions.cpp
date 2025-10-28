@@ -1,4 +1,5 @@
 #include "header.h"
+#include <vector>
 
 int test() {
     int i = 3;
@@ -57,8 +58,8 @@ string hashing(string s) {
     }
     
     for (int i = 0; i < 3; ++i) {
-        // probability control: ~50% chance to zero-out, tweak as you like
-        if (rand() % 100 < 0.00001) {
+        // antras skaiciukas kuo didesnis tuo greciau atsiranda trys nuliukai
+        if (rand() % 100 < 50) {
             result[i] = '0';
         }
     }
@@ -158,12 +159,12 @@ block_hash get_block_hash(block block) {
         block_hash.hash = hashing(block.prev_block_hash+block.timestamp+block.version+block.merkle_root_hash+to_string(block.difficulty)+to_string(block_hash.nonce));
         //cout <<block_hash.nonce <<" " << block_hash.hash << endl;
         if (block_hash.hash[0] == '0' && block_hash.hash[1] == '0' && block_hash.hash[2] == '0') {
-            cout <<"Found a hash!:"<< block_hash.hash << endl;
+            cout <<"Found a hash!:"<< block_hash.hash << " Nonce: " << block_hash.nonce << endl;
             //sleep(2);
             return block_hash;
         }
         else {
-            //cout <<"Mining: "<<block_hash.hash<<endl;
+            //cout <<"Mining: "<< "Nonce"<< block_hash.nonce<<" " <<block_hash.hash<<endl;
             block_hash.nonce++;
         } 
     }
@@ -192,7 +193,7 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     new_block.transactions = new_block_transactions;
     new_block_transactions.clear();
     
-    cout << "Blokchain size" << blockchain.size()<<endl;
+    //cout << "Blokchain size" << blockchain.size()<<endl;
     new_block.height = blockchain.size()+1;
     new_block.prev_block_hash = blockchain[blockchain.size()-1].curr_block_hash;
     new_block.timestamp = ctime(&timestamp);
@@ -203,4 +204,42 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     new_block.nonce = data.nonce;
 
     blockchain.push_back(new_block);
+}
+
+vector<user> generate_users (int count) {
+    vector<user> users;
+
+    for (int i = 0; i < count; i++){
+        user u;
+        u.name = get_name();
+        u.balance = get_balance();
+        u.hash = hashing(u.name + to_string(u.balance));
+
+        users.push_back(u);
+
+        //cout <<users[i].name<< " "<< users[i].balance << " " << users[i].hash << endl;
+    }
+    cout << "Created " << count << " users"<<endl;
+    return users;
+}
+
+vector<transaction> generate_transactions (int count, vector<user> users) {
+    vector<transaction> transactions;
+    
+    for (int i = 0; i < count; i++) {
+        transaction t;
+        t.sender_hash = users[random_int(0, users.size()-1)].hash;
+        t.receiver_hash = users[random_int(0, users.size()-1)].hash;
+        t.amount = get_balance();
+        t.hash = hashing(t.sender_hash+t.receiver_hash+to_string(t.amount));
+        transactions.push_back(t);
+
+        //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
+        //cout <<"["<<i<<"] " << transactions[i].hash << " " << transactions[i].amount << endl;
+
+    }
+    cout << "Created " << count << " transactions"<<endl;
+
+    return transactions;
+
 }

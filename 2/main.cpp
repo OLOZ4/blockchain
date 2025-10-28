@@ -3,34 +3,13 @@
 
 int main() {
 
-    vector<user> users;
-    time_t timestamp;
+    // Generuoja userius 
+    vector<user> users = generate_users(1000);
+    
+    // Generuoja transakcijas
+    vector<transaction> transactions = generate_transactions(10000000, users);
 
-    for (int i = 0; i < 1000; i++){
-        user u;
-        u.name = get_name();
-        u.balance = get_balance();
-        u.hash = hashing(u.name + to_string(u.balance));
-
-        users.push_back(u);
-
-        //cout <<users[i].name<< " "<< users[i].balance << " " << users[i].hash << endl;
-    }
-
-    vector<transaction> transactions;
-
-    for (int i = 0; i < 10000; i++) {
-        transaction t;
-        t.sender_hash = users[random_int(0, users.size()-1)].hash;
-        t.receiver_hash = users[random_int(0, users.size()-1)].hash;
-        t.amount = get_balance();
-        t.hash = hashing(t.sender_hash+t.receiver_hash+to_string(t.amount));
-        transactions.push_back(t);
-
-        //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
-        //cout <<"["<<i<<"] " << transactions[i].hash << " " << transactions[i].amount << endl;
-    }
-
+    // Validuoja transakcijas
     vector<transaction> valid_transactions = validate_transactions(users, transactions);
 
     for (int i = 0; i < valid_transactions.size(); i++) {
@@ -39,18 +18,20 @@ int main() {
         //cout <<"["<<i<<"] " << valid_transactions[i].hash << " " << valid_transactions[i].amount << endl;
     }
 
+    // Sukuria blockchaina
     vector<block> blockchain;
 
-
+    // Manually sukuriamas pirmas blokas
     block genesis = build_genesis_block();
 
     //cout << genesis.nonce << " "<< genesis.curr_block_hash<< " real" << endl;
-    //
+
+    // Genesis blokas pridedamas i blockchaina
     blockchain.push_back(genesis);
 
+    // Blokai pridedami i blockchaina iki kol nielieka transakciju
     while (valid_transactions.size() > 0) {
         add_block(blockchain,valid_transactions);
         cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl;
-        //sleep(3);
     }
 }

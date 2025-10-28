@@ -61,3 +61,7 @@ block build_genesis_block();
 block_hash get_block_hash(block block);
 
 void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions);
+
+vector<user> generate_users (int count);
+
+vector<transaction> generate_transactions (int count, vector<user> users);
