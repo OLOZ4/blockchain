@@ -29,12 +29,8 @@ g++ -std=c++17 -O2 -Wall -Wextra -o .\blockchain.exe .\main.cpp .\functions.cpp
 
 ![Console output](nuotraukos/blockchain1.png)
 ![Console output](nuotraukos/blockchain2.png)
-
-Tolimesni patobulinimai (v0.2 versijai)
-- Įdiegti tikrą Merkle medį ir apskaičiuoti Merkle root.
-- Pagerinti transakcijų verifikaciją (patikrinti `transaction_id`, balanso patikra prieš įtraukiant į galimą blocką).
-- Imituoti decentralizuotą kasimą: generuoti kelis kandidatinius blokus ir bandyti juos kasimo metu ribotą laiką.
+![Console output](nuotraukos/blockchain3.png)
 
 AI pagalba
-- Kai kurios refaktoringo idėjos ir README turinys parengti su AI pagalba; visa kodo logika ir sprendimai atlikti rankiniu būdu.
+- Kai kurios klaidų taisymo idėjos ir README turinys parengti su AI pagalba; visa kodo logika ir sprendimai atlikti rankiniu būdu.
 
