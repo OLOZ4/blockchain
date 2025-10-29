@@ -123,6 +123,13 @@ vector<transaction> validate_transactions(const vector<user>& users, const vecto
         }
 
         const user& sender = users[it_sender->second];
+        // Verify transaction_id matches recomputed hash (sender+receiver+amount)
+        string expected_tx_hash = hashing(tx.sender_hash + tx.receiver_hash + to_string(tx.amount));
+        if (tx.transaction_id != expected_tx_hash) {
+            // invalid transaction id -> skip
+            continue;
+        }
+
         // only validate here (do not mutate users); balances applied when block is created
         if (sender.balance >= tx.amount) {
             valid_txs.push_back(tx);
@@ -225,6 +232,14 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     }
 
     new_block.transactions = new_block_transactions;
+    // Compute a simple Merkle-like root: concatenated tx ids hashed
+    if (!new_block.transactions.empty()) {
+        string concat_ids = "";
+        for (const auto &tx : new_block.transactions) concat_ids += tx.transaction_id;
+        new_block.merkle_root_hash = hashing(concat_ids);
+    } else {
+        new_block.merkle_root_hash = "";
+    }
     new_block_transactions.clear();
     
     //cout << "Blokchain size" << blockchain.size()<<endl;
@@ -236,6 +251,11 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
 
     new_block.curr_block_hash = data.hash;
     new_block.nonce = data.nonce;
+
+    // Print a concise block summary
+    cout << "Block #" << new_block.height << " mined: nonce=" << new_block.nonce
+        << " hash=" << new_block.curr_block_hash << " merkle=" << new_block.merkle_root_hash
+        << " tx_count=" << new_block.transactions.size() << endl;
 
     blockchain.push_back(new_block);
 }
@@ -267,7 +287,8 @@ vector<transaction> generate_transactions (int count, vector<user> users) {
         t.sender_hash = users[random_int(0, users.size()-1)].public_key;
         t.receiver_hash = users[random_int(0, users.size()-1)].public_key;
         t.amount = get_balance();
-        t.hash = hashing(t.sender_hash+t.receiver_hash+to_string(t.amount)+to_string(i));
+        // transaction id is hash of sender+receiver+amount
+        t.hash = hashing(t.sender_hash + t.receiver_hash + to_string(t.amount));
         t.transaction_id = t.hash;
         transactions.push_back(t);
 
