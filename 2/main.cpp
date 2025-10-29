@@ -3,11 +3,11 @@
 
 int main() {
 
-    // Generuoja userius (dev default: 100 for quick testing)
-    vector<user> users = generate_users(100);
+    // Generuoja userius 
+    vector<user> users = generate_users(1000);
     
-    // Generuoja transakcijas (dev default: 1000 for quick testing)
-    vector<transaction> transactions = generate_transactions(1000, users);
+    // Generuoja transakcijas 
+    vector<transaction> transactions = generate_transactions(10000, users);
 
     // Validuoja transakcijas
     vector<transaction> valid_transactions = validate_transactions(users, transactions);

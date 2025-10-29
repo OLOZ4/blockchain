@@ -19,17 +19,16 @@ Pastabos apie įgyvendinimą (v0.1)
   4. Kasimas (Proof-of-Work): ieškoma bloko maišos, prasidedančios bent trimis nuliais (`000...`).
   5. Įtraukus transakcijas į bloką, atnaujinami vartotojų balansai.
 
-Dev režimo rekomendacija
-- Originalūs reikalavimai nurodo ~1000 vartotojų ir ~10,000 transakcijų. Tokie skaičiai gali užtrukti ar išeikvoti atmintį vietiniame kompiuteryje, todėl numatytieji dev parametrai yra:
-  - `generate_users(100)`
-  - `generate_transactions(1000, users)`
-
 Kaip paleisti (Windows PowerShell su g++)
 ```powershell
 cd 'C:\Users\User1\Documents\GitHub\blockchain\2' (tik pavyzdys, jums reikia nueiti į aplanką, kuriame yra šis kodas)
 g++ -std=c++17 -O2 -Wall -Wextra -o .\blockchain.exe .\main.cpp .\functions.cpp
 .\blockchain.exe
 ```
+
+
+
+
 
 Tolimesni patobulinimai (v0.2 versijai)
 - Įdiegti tikrą Merkle medį ir apskaičiuoti Merkle root.
