@@ -3,16 +3,16 @@
 
 int main() {
 
-    // Generuoja userius 
-    vector<user> users = generate_users(1000);
+    // Generuoja userius (dev default: 100 for quick testing)
+    vector<user> users = generate_users(100);
     
-    // Generuoja transakcijas
-    vector<transaction> transactions = generate_transactions(10000000, users);
+    // Generuoja transakcijas (dev default: 1000 for quick testing)
+    vector<transaction> transactions = generate_transactions(1000, users);
 
     // Validuoja transakcijas
     vector<transaction> valid_transactions = validate_transactions(users, transactions);
 
-    for (int i = 0; i < valid_transactions.size(); i++) {
+    for (size_t i = 0; i < valid_transactions.size(); i++) {
 
         //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
         //cout <<"["<<i<<"] " << valid_transactions[i].hash << " " << valid_transactions[i].amount << endl;
@@ -31,7 +31,7 @@ int main() {
 
     // Blokai pridedami i blockchaina iki kol nielieka transakciju
     while (valid_transactions.size() > 0) {
-        add_block(blockchain,valid_transactions);
+        add_block(blockchain,valid_transactions, users);
         cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl;
     }
 }

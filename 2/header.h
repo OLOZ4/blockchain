@@ -7,21 +7,23 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
-#include <unistd.h>
+// Removed inclusion of <unistd.h> as it's not used here and causes issues on Windows.
 
 using namespace std;
 
 struct user {
     string name;
     int balance;
-    string hash;
+    string public_key; // user's public key (identifier)
+    string hash;       // legacy field (kept for compatibility)
 };
 
 struct transaction {
     string sender_hash;
     string receiver_hash;
     int amount;
-    string hash;
+    string hash; // existing tx hash
+    string transaction_id; // explicit transaction id
 };
 
 struct block {
@@ -54,13 +56,13 @@ string get_name();
 
 int get_balance();
 
-vector<transaction>  validate_transactions(vector<user> users, vector<transaction> transactions);
+vector<transaction>  validate_transactions(const vector<user>& users, const vector<transaction>& transactions);
 
 block build_genesis_block();
 
 block_hash get_block_hash(block block);
 
-void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions);
+void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions, vector<user>& users);
 
 vector<user> generate_users (int count);
 

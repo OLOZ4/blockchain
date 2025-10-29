@@ -1,5 +1,7 @@
 #include "header.h"
 #include <vector>
+#include <unordered_map>
+#include <chrono>
 
 int test() {
     int i = 3;
@@ -87,9 +89,15 @@ string get_name() {
         names.push_back(name);
     }
 
-    string actual_name = names[random_int(0, names.size())];
-    names.clear();
+    // If names file is missing or empty, return a fallback name.
+    if (names.empty()) {
+        names.clear();
+        return string("Unknown");
+    }
 
+    int max_idx = static_cast<int>(names.size()) - 1; // inclusive max index
+    string actual_name = names[random_int(0, max_idx)];
+    names.clear();
     return actual_name;
 }
 
@@ -97,31 +105,30 @@ int get_balance() {
     return random_int(1, 1000000);
 }
 
-vector<transaction> validate_transactions(vector<user> users, vector<transaction> transactions) {
+vector<transaction> validate_transactions(const vector<user>& users, const vector<transaction>& transactions) {
+    // Build an index for users by their public_key (or hash)
+    std::unordered_map<std::string, size_t> user_idx;
+    for (size_t i = 0; i < users.size(); ++i) user_idx[users[i].public_key] = i;
+
     std::vector<transaction> valid_txs;
+    valid_txs.reserve(transactions.size());
 
     for (const auto& tx : transactions) {
-        auto it_sender = std::find_if(
-            users.begin(), users.end(),
-            [&](const user& u){ return u.hash == tx.sender_hash; });
-        auto it_receiver = std::find_if(
-            users.begin(), users.end(),
-            [&](const user& u){ return u.hash == tx.receiver_hash; });
+        auto it_sender = user_idx.find(tx.sender_hash);
+        auto it_receiver = user_idx.find(tx.receiver_hash);
 
-        if (it_sender == users.end() || it_receiver == users.end()) {
+        if (it_sender == user_idx.end() || it_receiver == user_idx.end()) {
             // unknown user
             continue;
         }
 
-        if (it_sender->balance >= tx.amount) {
-            
-            // apply
-            it_sender->balance   -= tx.amount;
-            it_receiver->balance += tx.amount;
-            
+        const user& sender = users[it_sender->second];
+        // only validate here (do not mutate users); balances applied when block is created
+        if (sender.balance >= tx.amount) {
             valid_txs.push_back(tx);
         }
     }
+
     return valid_txs;
 
 }
@@ -171,22 +178,49 @@ block_hash get_block_hash(block block) {
     
 }
 
-void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions) {
+void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions, vector<user>& users) {
     time_t timestamp = time(nullptr);
     
     block new_block;
     vector<transaction> new_block_transactions;
 
     
+    // Build a quick lookup of users by public_key
+    std::unordered_map<std::string, size_t> user_idx;
+    for (size_t i = 0; i < users.size(); ++i) user_idx[users[i].public_key] = i;
+
     if (valid_transactions.size() > 100) {
         for (int i = 0; i < 100; i++) {
-            int id = random_int(0, valid_transactions.size());
-            new_block_transactions.push_back(valid_transactions[id]);
+            int id = random_int(0, static_cast<int>(valid_transactions.size()) - 1);
+            transaction tx = valid_transactions[id];
+
+            // Apply balances when including tx in a block
+            auto s = user_idx.find(tx.sender_hash);
+            auto r = user_idx.find(tx.receiver_hash);
+            if (s != user_idx.end() && r != user_idx.end()) {
+                if (users[s->second].balance >= tx.amount) {
+                    users[s->second].balance -= tx.amount;
+                    users[r->second].balance += tx.amount;
+                    new_block_transactions.push_back(tx);
+                }
+            }
+
             valid_transactions.erase(valid_transactions.begin()+id);
         }
     }
     else {
-        new_block_transactions = valid_transactions;
+        // include remaining valid transactions and apply balances
+        for (const auto &tx : valid_transactions) {
+            auto s = user_idx.find(tx.sender_hash);
+            auto r = user_idx.find(tx.receiver_hash);
+            if (s != user_idx.end() && r != user_idx.end()) {
+                if (users[s->second].balance >= tx.amount) {
+                    users[s->second].balance -= tx.amount;
+                    users[r->second].balance += tx.amount;
+                    new_block_transactions.push_back(tx);
+                }
+            }
+        }
         valid_transactions.clear();
     }
 
@@ -213,7 +247,9 @@ vector<user> generate_users (int count) {
         user u;
         u.name = get_name();
         u.balance = get_balance();
-        u.hash = hashing(u.name + to_string(u.balance));
+        // generate a public_key and keep legacy hash in sync
+        u.public_key = hashing(u.name + to_string(u.balance) + to_string(rand()));
+        u.hash = u.public_key;
 
         users.push_back(u);
 
@@ -228,10 +264,11 @@ vector<transaction> generate_transactions (int count, vector<user> users) {
     
     for (int i = 0; i < count; i++) {
         transaction t;
-        t.sender_hash = users[random_int(0, users.size()-1)].hash;
-        t.receiver_hash = users[random_int(0, users.size()-1)].hash;
+        t.sender_hash = users[random_int(0, users.size()-1)].public_key;
+        t.receiver_hash = users[random_int(0, users.size()-1)].public_key;
         t.amount = get_balance();
-        t.hash = hashing(t.sender_hash+t.receiver_hash+to_string(t.amount));
+        t.hash = hashing(t.sender_hash+t.receiver_hash+to_string(t.amount)+to_string(i));
+        t.transaction_id = t.hash;
         transactions.push_back(t);
 
         //cout <<"["<<i<<"] " << transactions[i].sender_hash << " " << transactions[i].receiver_hash << " " << transactions[i].amount << endl;
