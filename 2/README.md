@@ -25,10 +25,9 @@ cd 'C:\Users\User1\Documents\GitHub\blockchain\2' (tik pavyzdys, jums reikia nue
 g++ -std=c++17 -O2 -Wall -Wextra -o .\blockchain.exe .\main.cpp .\functions.cpp
 .\blockchain.exe
 ```
-
-
-
-
+Štai ką turėtume matyti:
+![Console output](nuotraukos/blockchain1.png)
+![Console output](nuotraukos/blockchain2.png)
 
 Tolimesni patobulinimai (v0.2 versijai)
 - Įdiegti tikrą Merkle medį ir apskaičiuoti Merkle root.
