@@ -11,19 +11,64 @@
 
 using namespace std;
 
-struct user {
-    string name;
-    int balance;
-    string public_key; // user's public key (identifier)
-    string hash;       // legacy field (kept for compatibility)
+// Forward declaration so inline constructors in this header can call hashing()
+string hashing(string s);
+
+class user {
+private:
+    string name_;
+    int balance_ = 0;
+    string public_key_;
+    string hash_; // legacy field
+
+public:
+    user() = default;
+    user(const string &name, int balance) : name_(name), balance_(balance) {}
+    user(const string &name, int balance, const string &pubkey)
+        : name_(name), balance_(balance), public_key_(pubkey), hash_(pubkey) {}
+
+    // RAII-friendly default destructor
+    ~user() = default;
+
+    // Accessors
+    const string& getName() const { return name_; }
+    int getBalance() const { return balance_; }
+    void setBalance(int b) { balance_ = b; }
+    void adjustBalance(int delta) { balance_ += delta; }
+    const string& getPublicKey() const { return public_key_; }
+    void setPublicKey(const string &pk) { public_key_ = pk; }
+    const string& getHash() const { return hash_; }
+    void setHash(const string &h) { hash_ = h; }
 };
 
-struct transaction {
-    string sender_hash;
-    string receiver_hash;
-    int amount;
-    string hash; // existing tx hash
-    string transaction_id; // explicit transaction id
+class transaction {
+private:
+    string sender_hash_;
+    string receiver_hash_;
+    int amount_ = 0;
+    string hash_;
+    string transaction_id_;
+
+public:
+    transaction() = default;
+    transaction(const string &sender, const string &receiver, int amount)
+        : sender_hash_(sender), receiver_hash_(receiver), amount_(amount) {
+        // compute hash/id deterministically here
+        hash_ = hashing(sender_hash_ + receiver_hash_ + to_string(amount_));
+        transaction_id_ = hash_;
+    }
+    ~transaction() = default;
+
+    const string& getSenderHash() const { return sender_hash_; }
+    const string& getReceiverHash() const { return receiver_hash_; }
+    int getAmount() const { return amount_; }
+    const string& getHash() const { return hash_; }
+    const string& getTransactionId() const { return transaction_id_; }
+    void setSenderHash(const string &s) { sender_hash_ = s; }
+    void setReceiverHash(const string &r) { receiver_hash_ = r; }
+    void setAmount(int a) { amount_ = a; }
+    void setHash(const string &h) { hash_ = h; }
+    void setTransactionId(const string &id) { transaction_id_ = id; }
 };
 
 struct block {
