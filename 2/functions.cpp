@@ -171,7 +171,7 @@ block_hash get_block_hash(block block) {
         block_hash.hash = hashing(block.prev_block_hash+block.timestamp+block.version+block.merkle_root_hash+to_string(block.difficulty)+to_string(block_hash.nonce));
         //cout <<block_hash.nonce <<" " << block_hash.hash << endl;
         if (block_hash.hash[0] == '0' && block_hash.hash[1] == '0' && block_hash.hash[2] == '0') {
-            cout <<"Found a hash!:"<< block_hash.hash << " Nonce: " << block_hash.nonce << endl;
+            //cout <<"Found a hash!:"<< block_hash.hash << " Nonce: " << block_hash.nonce << endl;
             //sleep(2);
             return block_hash;
         }

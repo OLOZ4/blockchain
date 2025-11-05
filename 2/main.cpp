@@ -32,6 +32,8 @@ int main() {
     // Blokai pridedami i blockchaina iki kol nielieka transakciju
     while (valid_transactions.size() > 0) {
         add_block(blockchain,valid_transactions, users);
-        cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl;
+        cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl << endl;
     }
+
+   
 }
