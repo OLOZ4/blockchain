@@ -7,10 +7,13 @@ int main() {
     vector<user> users = generate_users(1000);
     
     // Generuoja transakcijas 
-    vector<transaction> transactions = generate_transactions(100000, users);
+    vector<transaction> transactions = generate_transactions(10000, users);
 
     // Validuoja transakcijas
     vector<transaction> valid_transactions = validate_transactions(users, transactions);
+
+    // Show how many transactions passed pre-inclusion validation
+    cout << "After validation: " << valid_transactions.size() << " transactions kept (out of " << transactions.size() << ")" << endl;
 
     for (size_t i = 0; i < valid_transactions.size(); i++) {
 

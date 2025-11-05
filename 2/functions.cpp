@@ -1,7 +1,9 @@
 #include "header.h"
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <chrono>
+#include <functional>
 
 int test() {
     int i = 3;
@@ -59,9 +61,11 @@ string hashing(string s) {
         }
     }
     
+    // deterministic zero injection so hashing(s) is stable across calls
+    size_t hval = std::hash<string>{}(s);
     for (int i = 0; i < 3; ++i) {
-        // antras skaiciukas kuo didesnis tuo greciau atsiranda trys nuliukai
-        if (rand() % 100 < 50) {
+        // use different bits of hval to get per-position variability
+        if ((((hval >> (i * 8)) ^ hval) % 100) < 50) {
             result[i] = '0';
         }
     }
@@ -106,35 +110,63 @@ int get_balance() {
 }
 
 vector<transaction> validate_transactions(const vector<user>& users, const vector<transaction>& transactions) {
-    // Build an index for users by their public_key (or hash)
+    // Perform light pre-inclusion validation:
+    // - ensure sender and receiver exist
+    // - ensure the transaction id/hash matches recomputed value
+    // Do NOT check balances here; balances are dynamic and are checked when
+    // selecting transactions for a block (in add_block()).
+
     std::unordered_map<std::string, size_t> user_idx;
     for (size_t i = 0; i < users.size(); ++i) user_idx[users[i].getPublicKey()] = i;
 
-    std::vector<transaction> valid_txs;
-    valid_txs.reserve(transactions.size());
+    vector<transaction> out;
+    out.reserve(transactions.size());
+    std::unordered_set<std::string> seen_ids;
 
-    for (const auto& tx : transactions) {
-        auto it_sender = user_idx.find(tx.getSenderHash());
-        auto it_receiver = user_idx.find(tx.getReceiverHash());
+    // Build a mutable view of balances to perform balance checks during
+    // pre-validation. This accepts transactions up to the available balance
+    // when iterating in order. It prevents trivially invalid transactions
+    // (sender can't cover cumulative outgoing amount observed here).
+    std::unordered_map<std::string, long long> avail_balance;
+    avail_balance.reserve(users.size());
+    for (const auto &u : users) avail_balance[u.getPublicKey()] = u.getBalance();
 
-        if (it_sender == user_idx.end() || it_receiver == user_idx.end()) {
-            continue; // unknown user
+    for (const auto &tx : transactions) {
+        // reject obvious invalids early
+        if (tx.getAmount() <= 0) continue;                    // non-positive amount
+        if (tx.getSenderHash() == tx.getReceiverHash()) continue; // self-transfer
+
+        auto s = user_idx.find(tx.getSenderHash());
+        auto r = user_idx.find(tx.getReceiverHash());
+        if (s == user_idx.end() || r == user_idx.end()) {
+            // unknown participant, drop the transaction
+            continue;
         }
 
-        const user& sender = users[it_sender->second];
-        // Verify transaction_id matches recomputed hash (sender+receiver+amount)
-        string expected_tx_hash = hashing(tx.getSenderHash() + tx.getReceiverHash() + to_string(tx.getAmount()));
-        if (tx.getTransactionId() != expected_tx_hash) {
-            continue; // invalid transaction id
+        // recompute id/hash deterministically and compare
+        string expected = hashing(tx.getSenderHash() + tx.getReceiverHash() + to_string(tx.getAmount()));
+        if (expected != tx.getTransactionId()) {
+            // malformed or tampered transaction, drop it
+            continue;
         }
 
-        // only validate here (do not mutate users); balances applied when block is created
-        if (sender.getBalance() >= tx.getAmount()) {
-            valid_txs.push_back(tx);
+        // reject duplicate transaction ids (keep first occurrence)
+        if (seen_ids.find(tx.getTransactionId()) != seen_ids.end()) continue;
+        // check sender balance against our running available balance
+        auto bal_it = avail_balance.find(tx.getSenderHash());
+        if (bal_it == avail_balance.end()) continue; // should not happen, defensive
+        if (bal_it->second < tx.getAmount()) {
+            // sender cannot cover this tx given previously accepted ones
+            continue;
         }
+
+        // accept tx: reserve amount
+        bal_it->second -= tx.getAmount();
+        seen_ids.insert(tx.getTransactionId());
+        out.push_back(tx);
     }
 
-    return valid_txs;
+    return out;
 
 }
 
@@ -193,40 +225,89 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     // Build a quick lookup of users by public_key
     std::unordered_map<std::string, size_t> user_idx;
     for (size_t i = 0; i < users.size(); ++i) user_idx[users[i].getPublicKey()] = i;
+    // Select up to 100 transactions to include in the block while preserving
+    // skipped-but-valid transactions in the mempool.
+    if (!valid_transactions.empty()) {
+        // Shuffle mempool to avoid bias
+        std::mt19937 rng(std::random_device{}());
+        std::shuffle(valid_transactions.begin(), valid_transactions.end(), rng);
 
-    if (valid_transactions.size() > 100) {
-        for (int i = 0; i < 100; i++) {
-            int id = random_int(0, static_cast<int>(valid_transactions.size()) - 1);
-            transaction tx = valid_transactions[id];
+        vector<transaction> remaining;
+        remaining.reserve(valid_transactions.size());
 
-            // Apply balances when including tx in a block
-            auto s = user_idx.find(tx.getSenderHash());
-            auto r = user_idx.find(tx.getReceiverHash());
-            if (s != user_idx.end() && r != user_idx.end()) {
-                if (users[s->second].getBalance() >= tx.getAmount()) {
-                    users[s->second].adjustBalance(-tx.getAmount());
-                    users[r->second].adjustBalance(tx.getAmount());
-                    new_block_transactions.push_back(tx);
-                }
-            }
-
-            valid_transactions.erase(valid_transactions.begin()+id);
-        }
-    }
-    else {
-        // include remaining valid transactions and apply balances
         for (const auto &tx : valid_transactions) {
+            if (new_block_transactions.size() >= 100) {
+                // keep remaining txs for future blocks
+                remaining.push_back(tx);
+                continue;
+            }
+
             auto s = user_idx.find(tx.getSenderHash());
             auto r = user_idx.find(tx.getReceiverHash());
-            if (s != user_idx.end() && r != user_idx.end()) {
+            if (s == user_idx.end() || r == user_idx.end()) {
+                // malformed/unknown participants should have been filtered earlier
+                // but skip them defensively
+                continue;
+            }
+
+            if (users[s->second].getBalance() >= tx.getAmount()) {
+                // apply balances and include tx
+                users[s->second].adjustBalance(-tx.getAmount());
+                users[r->second].adjustBalance(tx.getAmount());
+                new_block_transactions.push_back(tx);
+            } else {
+                // sender has insufficient funds right now: keep tx in mempool
+                remaining.push_back(tx);
+            }
+        }
+
+        // If nothing could be included from the shuffled pass, try a fallback
+        // that prefers smallest transactions (better packing). This often
+        // progresses the mempool when shuffle missed many small txs.
+        if (new_block_transactions.empty()) {
+            // create a copy sorted by amount ascending
+            vector<transaction> sorted = valid_transactions;
+            std::sort(sorted.begin(), sorted.end(), [](const transaction &a, const transaction &b){
+                return a.getAmount() < b.getAmount();
+            });
+
+            // try to include up to 100 smallest txs
+            std::vector<std::string> included_ids;
+            included_ids.reserve(100);
+            for (const auto &tx : sorted) {
+                if (new_block_transactions.size() >= 100) break;
+                auto s = user_idx.find(tx.getSenderHash());
+                auto r = user_idx.find(tx.getReceiverHash());
+                if (s == user_idx.end() || r == user_idx.end()) continue;
                 if (users[s->second].getBalance() >= tx.getAmount()) {
                     users[s->second].adjustBalance(-tx.getAmount());
                     users[r->second].adjustBalance(tx.getAmount());
                     new_block_transactions.push_back(tx);
+                    included_ids.push_back(tx.getTransactionId());
                 }
             }
+
+            if (!new_block_transactions.empty()) {
+                // rebuild remaining excluding included txs
+                vector<transaction> remaining2;
+                remaining2.reserve(valid_transactions.size() - new_block_transactions.size());
+                for (const auto &tx : valid_transactions) {
+                    bool was_included = false;
+                    for (const auto &id : included_ids) if (tx.getTransactionId() == id) { was_included = true; break; }
+                    if (!was_included) remaining2.push_back(tx);
+                }
+                valid_transactions = std::move(remaining2);
+            } else {
+                // Still nothing included -> no progress possible (insufficient
+                // balances for all remaining txs). Stop to avoid infinite loop.
+                cout << "No transactions could be included in this pass (insufficient balances). Stopping. Remaining: " << valid_transactions.size() << "\n";
+                // leave mempool as-is for inspection, but clear to stop main loop
+                valid_transactions.clear();
+            }
+        } else {
+            // normal case: some txs included, keep the remaining for next blocks
+            valid_transactions = std::move(remaining);
         }
-        valid_transactions.clear();
     }
 
     new_block.transactions = new_block_transactions;
@@ -286,9 +367,13 @@ vector<transaction> generate_transactions (int count, vector<user> users) {
             receiver_idx = random_int(0, static_cast<int>(users.size()) - 1);
         }
 
-        int max_amt = users[sender_idx].getBalance();
-        if (max_amt < 1) max_amt = 1;
-        int amt = random_int(1, max_amt);
+    // To increase the chance that transactions are accepted when
+    // blocks are assembled, generate smaller transactions on average.
+    // Use a fraction of the sender's balance (here 1/4) as the
+    // maximum amount for a single generated transaction.
+    int sender_balance = users[sender_idx].getBalance();
+    int max_amt = (sender_balance / 4) >= 1 ? (sender_balance / 4) : 1;
+    int amt = random_int(1, max_amt);
 
         const string &s = users[sender_idx].getPublicKey();
         const string &r = users[receiver_idx].getPublicKey();
