@@ -61,6 +61,7 @@ Failai, į kuriuos reikėtų atkreipti dėmesį
 - `functions.cpp` — didžioji dalis logikos: hashing(), generate_*, validate_transactions(), add_block(), kasimo funkcijos.
 - `header.h` — klasės ir tipai.
 
+Paleisto kodo pavyzdys:
 ![Kasimo pradžia](nuotraukos/pradzia.png)
 ![Blokų pavyzdys](nuotraukos/3blockai.png)
 ![Apibendrintas blockchainas](nuotraukos/blockchainsummary1.png)
