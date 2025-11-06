@@ -62,6 +62,7 @@ Failai, į kuriuos reikėtų atkreipti dėmesį
 - `header.h` — klasės ir tipai.
 
 Paleisto kodo pavyzdys:
+
 ![Kasimo pradžia](2/nuotraukos/pradzia.png)
 ![Blokų pavyzdys](2/nuotraukos/3blockai.png)
 ![Apibendrintas blockchainas](2/nuotraukos/blockchainsummary1.png)
