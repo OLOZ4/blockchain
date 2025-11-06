@@ -218,9 +218,59 @@ block_hash get_block_hash(block block) {
 }
 
 block_hash get_block_hash_threaded(const block& block) {
-    // Some toolchains on Windows (older MinGW) have incomplete <thread>/<mutex>
-    // support. Use a single-threaded fallback to keep builds portable.
-    return get_block_hash(block);
+    // #ifdef ENABLE_THREADS
+    //const int num_threads = 2;
+    //unsigned int num_threads = thread::hardware_concurrency();
+/*
+    atomic<bool> found(false);
+    block_hash result;
+    mutex result_mutex;
+
+    auto worker = [&](int thread_id) {
+        block_hash local_hash;
+        local_hash.nonce = thread_id;  // each thread starts at a different nonce
+
+        while (!found) {
+            local_hash.hash = hashing(
+                block.prev_block_hash +
+                block.timestamp +
+                block.version +
+                block.merkle_root_hash +
+                to_string(block.difficulty) +
+                to_string(local_hash.nonce)
+            );
+
+            // check if hash meets difficulty (3 leading '0's here)
+            if (local_hash.hash[0] == '0' && local_hash.hash[1] == '0' && local_hash.hash[2] == '0') {
+                // Save result only once
+                {
+                    lock_guard<mutex> lock(result_mutex);
+                    if (!found) {
+                        local_hash.core = thread_id +1;
+                        found = true;
+                        result = local_hash;
+                        
+                        //cout <<endl<<"(Core " << thread_id+1 << "): ";
+                    }
+                }
+                break;
+            }
+
+            // increment nonce differently for each thread to avoid overlap
+            local_hash.nonce += num_threads;
+        }
+    };
+
+    vector<thread> threads;
+    for (int i = 0; i < num_threads; ++i)
+        threads.emplace_back(worker, i);
+
+    for (auto& t : threads) t.join();
+
+    return result;
+    //#endif
+    */
+   return get_block_hash(block);
 }
 
 void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions, vector<user>& users) {
