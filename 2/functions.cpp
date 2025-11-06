@@ -211,8 +211,8 @@ block_hash get_block_hash(block block) {
 }
 
 block_hash get_block_hash_threaded(const block& block) {
-    //const int num_threads = 4;
-    unsigned int num_threads = thread::hardware_concurrency();
+    const int num_threads = 2;
+    //unsigned int num_threads = thread::hardware_concurrency();
 
     atomic<bool> found(false);
     block_hash result;
@@ -240,7 +240,7 @@ block_hash get_block_hash_threaded(const block& block) {
                     if (!found) {
                         found = true;
                         result = local_hash;
-                        cout <<"(Core " << thread_id << ") ";
+                        cout <<"(Core " << thread_id+1 << ") ";
                     }
                 }
                 break;
@@ -251,7 +251,6 @@ block_hash get_block_hash_threaded(const block& block) {
         }
     };
 
-    // Launch 4 threads (one per core)
     vector<thread> threads;
     for (int i = 0; i < num_threads; ++i)
         threads.emplace_back(worker, i);
