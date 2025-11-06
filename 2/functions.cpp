@@ -56,11 +56,12 @@ string hashing(string s) {
         }
     }
     
+
     // deterministic zero injection so hashing(s) is stable across calls
     size_t hval = std::hash<string>{}(s);
     for (int i = 0; i < 3; ++i) {
         // use different bits of hval to get per-position variability
-    if (rand() % 100 < 5) {
+    if (rand() % 100 < diff) {
         result[i] = '0';
         }
     }
@@ -180,6 +181,7 @@ block build_genesis_block() {
     gen.hash = "000455412474814151v23214393365542W2153Z2456933065b31Em147Sv149Rs";
     gen.nonce = 61706;
 
+     
     genesis.curr_block_hash = gen.hash;
     genesis.nonce = gen.nonce;
 
@@ -211,7 +213,7 @@ block_hash get_block_hash(block block) {
 }
 
 block_hash get_block_hash_threaded(const block& block) {
-    const int num_threads = 2;
+    //const int num_threads = 2;
     //unsigned int num_threads = thread::hardware_concurrency();
 
     atomic<bool> found(false);
@@ -238,9 +240,11 @@ block_hash get_block_hash_threaded(const block& block) {
                 {
                     lock_guard<mutex> lock(result_mutex);
                     if (!found) {
+                        local_hash.core = thread_id +1;
                         found = true;
                         result = local_hash;
-                        cout <<"(Core " << thread_id+1 << ") ";
+                        
+                        //cout <<endl<<"(Core " << thread_id+1 << "): ";
                     }
                 }
                 break;
@@ -370,17 +374,21 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     new_block.height = blockchain.size()+1;
     new_block.prev_block_hash = blockchain[blockchain.size()-1].curr_block_hash;
     new_block.timestamp = ctime(&timestamp);
-    
+    new_block.difficulty = new_block.difficulty + 0.1*new_block.height;
+
     block_hash data = get_block_hash_threaded(new_block);
 
     new_block.curr_block_hash = data.hash;
     new_block.nonce = data.nonce;
+    new_block.core = data.core;
 
     // Print a concise block summary
-    cout << "Block #" << new_block.height << " mined: nonce=" << new_block.nonce
+    /*cout << "Block #" << new_block.height << " mined: nonce=" << new_block.nonce
         << " hash=" << new_block.curr_block_hash << " merkle=" << new_block.merkle_root_hash
         << " tx_count=" << new_block.transactions.size() << endl;
+    */
 
+    print_block(new_block);
     blockchain.push_back(new_block);
 }
 
@@ -433,4 +441,110 @@ vector<transaction> generate_transactions (int count, vector<user> users) {
 
     return transactions;
 
+}
+
+void print_block(const block& b) {
+    cout << "\n"
+         << "╔══════════════════════════════════════════════════════════╗\n"
+         << "║                     🧱 BLOCK DETAILS                     ║\n"
+         << "╚══════════════════════════════════════════════════════════╝\n\n";
+
+    cout << left << setw(20) << "🔢 Height:"          << b.height << "\n"
+         << left << setw(20) << "🧮 Mined on core:"          << b.core << "\n"
+         << left << setw(19) << "⏰ Timestamp:"       << b.timestamp << "\n"
+         << left << setw(23) << "⚙️  Version:"            << b.version << "\n"
+         << left << setw(20) << "🎯 Difficulty:"       << b.difficulty << "\n"
+         << left << setw(20) << "🔁 Nonce:"            << b.nonce << "\n\n"
+
+         << left << setw(20) << "🔗 Prev Hash:"        << b.prev_block_hash << "\n"
+         << left << setw(20) << "🔒 Curr Hash:"        << b.curr_block_hash << "\n"
+         << left << setw(20) << "🌳 Merkle Root:"      << b.merkle_root_hash << "\n";
+
+    cout << "\n📦 Transactions: " << setw(3) <<b.transactions.size() << "\n";
+    cout << "───────────────────────────────────────────────────────────\n";
+
+    if (b.transactions.empty()) {
+        cout << "   (No transactions in this block)\n";
+    }
+}
+
+void print_blockchain_summary(const vector<block>& blockchain) {
+    cout << "\n"
+         << "╔════════════════════════════════════════════════════════════════════════════════════════════════╗\n"
+         << "║                                   📜 BLOCKCHAIN SUMMARY                                       ║\n"
+         << "╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n";
+
+    if (blockchain.empty()) {
+        cout << "\n🚫 The blockchain is empty. No blocks to display.\n\n";
+        return;
+    }
+
+    cout << left
+         << setw(8)  << "HEIGHT"
+         << setw(25) << "TIMESTAMP"
+         << setw(16) << "HASH"
+         << setw(10) << "TX_COUNT"
+         << setw(10) << "NONCE"
+         << setw(12) << "DIFFICULTY"
+         << setw(10) << "CORE"
+         << endl;
+
+    cout << string(95, '-') << "\n";
+
+    for (const auto& b : blockchain) {
+        cout << left
+             << setw(8)  << b.height
+             << setw(25) << b.timestamp.substr(0, 24)   // shorten timestamp if too long
+             << setw(16) << (b.curr_block_hash.size() > 12 ? b.curr_block_hash.substr(0, 12) + "..." : b.curr_block_hash)
+             << setw(10) << b.transactions.size()
+             << setw(10) << b.nonce
+             << setw(12) << b.difficulty
+             << setw(10) << b.core
+             << endl;
+    }
+
+    cout << string(95, '-') << "\n";
+    cout << "Total blocks: " << blockchain.size() << "\n\n";
+}
+
+void print_blockchain_overview(const vector<block>& blockchain) {
+    cout << "\n"
+         << "╔══════════════════════════════════════════════════════════════╗\n"
+         << "║                 🌍 BLOCKCHAIN OVERVIEW SUMMARY               ║\n"
+         << "╚══════════════════════════════════════════════════════════════╝\n\n";
+
+    if (blockchain.empty()) {
+        cout << "🚫 The blockchain is empty.\n\n";
+        return;
+    }
+
+    int total_blocks = blockchain.size();
+    int total_transactions = 0;
+    double total_difficulty = 0.0;
+    int total_nonce = 0;
+
+    for (const auto& b : blockchain) {
+        total_transactions += static_cast<int>(b.transactions.size());
+        total_difficulty += b.difficulty;
+        total_nonce += b.nonce;
+    }
+
+    double avg_tx_per_block = total_transactions / static_cast<double>(total_blocks);
+    double avg_difficulty = total_difficulty / total_blocks;
+    double avg_nonce = total_nonce / static_cast<double>(total_blocks);
+
+    const block& last_block = blockchain.back();
+
+    cout << fixed << setprecision(2);
+
+    cout << left << setw(25) << "📏 Total Blocks:"        << total_blocks << "\n"
+         << left << setw(25) << "💸 Total Transactions:"  << total_transactions << "\n"
+         << left << setw(25) << "📊 Avg TX per Block:"    << avg_tx_per_block << "\n"
+         << left << setw(25) << "🎯 Avg Difficulty:"      << avg_difficulty << "\n"
+         << left << setw(25) << "🔁 Avg Nonce:"           << avg_nonce << "\n"
+         << left << setw(25) << "🔒 Latest Block Hash:"   << last_block.curr_block_hash << "\n"
+         << left << setw(25) << "🧮 Latest Block Height:" << last_block.height << "\n"
+         << left << setw(24) << "⏰ Last Timestamp:"      << last_block.timestamp << "\n";
+
+    cout << "\n✅ Blockchain summary generated successfully.\n\n";
 }

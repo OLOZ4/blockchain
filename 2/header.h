@@ -13,10 +13,16 @@
 #include <unordered_set>
 #include <chrono>
 #include <functional>
+#include <iomanip>
 
 using namespace std;
 
 string hashing(string s);
+
+extern const int num_threads;
+
+extern const double diff;
+
 
 class user {
 private:
@@ -83,7 +89,8 @@ struct block {
     string timestamp = "";
     string version = "1.0";
     string merkle_root_hash = "";
-    int difficulty = 1 + 0.1 * height;
+    double difficulty = 1 + 0.1 * height;
+    int core = -1;
 
     vector<transaction> transactions;
 };
@@ -91,6 +98,7 @@ struct block {
 struct block_hash {
     int nonce;
     string hash;
+    int core;
 };
 
 int test();
@@ -116,3 +124,9 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
 vector<user> generate_users (int count);
 
 vector<transaction> generate_transactions (int count, vector<user> users);
+
+void print_block(const block& b);
+
+void print_blockchain_summary(const vector<block>& blockchain);
+
+void print_blockchain_overview(const vector<block>& blockchain);

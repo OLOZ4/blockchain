@@ -1,7 +1,11 @@
 #include "header.h"
 
+const int num_threads = 3;
+
+const double diff = 5;
 
 int main() {
+
 
     // Generuoja userius 
     vector<user> users = generate_users(1000);
@@ -35,8 +39,10 @@ int main() {
     // Blokai pridedami i blockchaina iki kol nielieka transakciju
     while (valid_transactions.size() > 0) {
         add_block(blockchain,valid_transactions, users);
-        cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl << endl;
+        //cout << "Blokchain size: " <<blockchain.size()<< " " << "Transactions left: "<< valid_transactions.size()<<endl << endl;
     }
 
+    print_blockchain_summary(blockchain);
    
+    print_blockchain_overview(blockchain);
 }
