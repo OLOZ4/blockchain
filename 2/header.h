@@ -4,14 +4,18 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
-#include <string>
 #include <cstdlib>
 #include <ctime>
-// Removed inclusion of <unistd.h> as it's not used here and causes issues on Windows.
+#include <thread>
+#include <atomic>
+#include <mutex>
+#include <unordered_map>
+#include <unordered_set>
+#include <chrono>
+#include <functional>
 
 using namespace std;
 
-// Forward declaration so inline constructors in this header can call hashing()
 string hashing(string s);
 
 class user {

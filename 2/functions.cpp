@@ -1,9 +1,4 @@
 #include "header.h"
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <chrono>
-#include <functional>
 
 int test() {
     int i = 3;
@@ -65,8 +60,8 @@ string hashing(string s) {
     size_t hval = std::hash<string>{}(s);
     for (int i = 0; i < 3; ++i) {
         // use different bits of hval to get per-position variability
-        if ((((hval >> (i * 8)) ^ hval) % 100) < 50) {
-            result[i] = '0';
+    if (rand() % 100 < 5) {
+        result[i] = '0';
         }
     }
 
@@ -215,6 +210,57 @@ block_hash get_block_hash(block block) {
     
 }
 
+block_hash get_block_hash_threaded(const block& block) {
+    //const int num_threads = 4;
+    unsigned int num_threads = thread::hardware_concurrency();
+
+    atomic<bool> found(false);
+    block_hash result;
+    mutex result_mutex;
+
+    auto worker = [&](int thread_id) {
+        block_hash local_hash;
+        local_hash.nonce = thread_id;  // each thread starts at a different nonce
+
+        while (!found) {
+            local_hash.hash = hashing(
+                block.prev_block_hash +
+                block.timestamp +
+                block.version +
+                block.merkle_root_hash +
+                to_string(block.difficulty) +
+                to_string(local_hash.nonce)
+            );
+
+            // check if hash meets difficulty (3 leading '0's here)
+            if (local_hash.hash[0] == '0' && local_hash.hash[1] == '0' && local_hash.hash[2] == '0') {
+                // Save result only once
+                {
+                    lock_guard<mutex> lock(result_mutex);
+                    if (!found) {
+                        found = true;
+                        result = local_hash;
+                        cout <<"(Core " << thread_id << ") ";
+                    }
+                }
+                break;
+            }
+
+            // increment nonce differently for each thread to avoid overlap
+            local_hash.nonce += num_threads;
+        }
+    };
+
+    // Launch 4 threads (one per core)
+    vector<thread> threads;
+    for (int i = 0; i < num_threads; ++i)
+        threads.emplace_back(worker, i);
+
+    for (auto& t : threads) t.join();
+
+    return result;
+}
+
 void add_block(vector<block>& blockchain, vector<transaction>& valid_transactions, vector<user>& users) {
     time_t timestamp = time(nullptr);
     
@@ -326,7 +372,7 @@ void add_block(vector<block>& blockchain, vector<transaction>& valid_transaction
     new_block.prev_block_hash = blockchain[blockchain.size()-1].curr_block_hash;
     new_block.timestamp = ctime(&timestamp);
     
-    block_hash data = get_block_hash(new_block);
+    block_hash data = get_block_hash_threaded(new_block);
 
     new_block.curr_block_hash = data.hash;
     new_block.nonce = data.nonce;
