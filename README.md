@@ -44,6 +44,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -o .\blockchain.exe .\main.cpp .\functions.cpp
 ```
 Pastaba: jei norite multi-threaded kasimo pagalbos ir turite modernų toolchain (MinGW-w64/ MSYS2 arba Linux), pridėkite `-pthread` prie komandos kompiliacijos metu.
 
+Multithreadinimo funkcija:
 ![Multithreadinimas](2/nuotraukos/multithreadinimas.png)
 
 Patikrinimai ir greiti testai
@@ -51,7 +52,6 @@ Patikrinimai ir greiti testai
   - pakeiskite `generate_users(1000)` ir `generate_transactions(10000, users)` laikinai į mažesnius kiekius `main.cpp`.
 - Po validacijos programa išveda: "After validation: X (out of Y)". Tai rodo, kiek tx praėjo pre-validation.
 
-Ką vertinti (pagal užduoties kriterijus)
 - Kodo struktūra (OOP, enkapsuliacija): `user` ir `transaction` yra klasėmis su getter'iais/setter'iais.
 - Kasimo ir validavimo logika: validacija dviem sluoksniais, PoW veikia pagal sąlygą (leading zeros), nonce iteracijos matomos konsolėje.
 - Rezultatai ir dokumentacija: README aiškiai paaiškina, ką padarėme.
